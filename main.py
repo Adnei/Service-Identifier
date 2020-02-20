@@ -24,7 +24,7 @@ def printRepeated(fileMap, repeatedPorts):
         print(fileMap[portEl['line']][2], '||',fileMap[portEl['line']][8] )
 
 #path to a lsof default outoput file
-lsofFile = '../RabbitMQ/lsof_5672_v2'
+lsofFile = 'lsof_5672'
 fileMap = l_utils.lsofMapping(lsofFile)
 portsList = l_utils.getPortsList(fileMap)
 repeatedPorts = l_utils.getRepeatedList(portsList)
