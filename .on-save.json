@@ -1,0 +1,6 @@
+[
+  {
+    "files": "**/*.py",
+    "command": "python3.8 ${srcFile}"
+  }
+]
