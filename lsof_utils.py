@@ -1,3 +1,6 @@
+##############################################
+#                 @DEPRECATED                #
+##############################################
 import pandas as pd
 import re
 import collections
@@ -55,9 +58,9 @@ def check_repeated_ports(repeated_ports, file_map):
 
 def validate_file(lsof_file=None, file_map=None, ports_list=None, repeated_ports=None):
     if(lsof_file is not None):
-        file_map = None
-        ports_list = None
-        repeated_ports = None
+        file_map = lsof_mapping(lsof_file)
+        ports_list = get_ports_list(file_map)
+        repeated_ports = get_repeated_list(ports_list)
     else:
         if(file_map is not None):
             if(ports_list is None):
@@ -84,3 +87,27 @@ def print_repeated(file_map, repeated_ports):
             print('\n======================================================================================')
             print('PORT', port_el['port'],'\n')
         print(file_map[port_el['line']][2], '||',file_map[port_el['line']][8] )
+
+def build_service_port_mapper(file_map, ports_list, repeated_ports):
+    def port_append(service, port_obj, service_port_mapper):
+        if(service in service_port_mapper):
+            service_port_mapper[service].add(port_obj['port'])
+        else:
+            service_port_mapper[service] = {port_obj['port']}
+
+    service_port_mapper = {}
+    repeated = [port_obj['port'] for port_obj in repeated_ports]
+    unique_ports = list(filter( lambda el: el['port'] not in repeated, ports_list))
+
+    for repeated_obj in repeated_ports:
+        for line in repeated_obj['lines']:
+            service = file_map[line][2]
+            if service != 'rabbitmq':
+                break
+        port_append(service, repeated_obj, service_port_mapper)
+
+    for port_obj in unique_ports:
+        service = file_map[line][2]
+        port_append(service, port_obj, service_port_mapper)
+
+    return service_port_mapper
