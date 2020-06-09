@@ -149,10 +149,16 @@ class Lsof_Mapper:
             Returns a dict as follows: {<service>:<set of ports>}. Ex.: {'glance':{1234,5678}, 'neutron':{1111,2222}}
         """
         def port_append(service, port_obj, service_port_mapper):
+            """
+                Aux function. Either appends a port to a server or creates the server entry in the map
+            """
             if(service in service_port_mapper):
                 service_port_mapper[service].add(port_obj['port'])
             else:
                 service_port_mapper[service] = {port_obj['port']}
+
+        def fix_service_name(service):
+            return service.split('-')[0].split()[0]
 
         service_port_mapper = {}
         repeated = [port_obj['port'] for port_obj in self.repeated_ports]
@@ -163,10 +169,10 @@ class Lsof_Mapper:
                 service = self.file_map[line][2]
                 if service != 'rabbitmq':
                     break
-            port_append(service, repeated_obj, service_port_mapper)
+            port_append(fix_service_name(service), repeated_obj, service_port_mapper)
 
         for port_obj in unique_ports:
             service = self.file_map[line][2]
-            port_append(service, port_obj, service_port_mapper)
+            port_append(fix_service_name(service), port_obj, service_port_mapper)
 
         return service_port_mapper
